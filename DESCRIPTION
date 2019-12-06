@@ -1,8 +1,8 @@
 Package: gdalcmdline
 Title: Yet another R wrapper for GDAL's utilities
 Version: 0.1
-Authors@R: person("Alber", "Sanchez", email = "albhasan@gmail.com",
-                  role = c("aut", "cre"))
+Authors@R: c(person('Alber', 'Sanchez', email = "alber.ipia@inpe.com", role = c("aut", "cre")),
+             person('Rolf', 'Simoes', role = c('aut'), email = 'rolf.simoes@inpe.br'))
 Description: Call GDAL's utilies using simple system calls and file paths. It 
              adds suppors for gdal_callc (which is missing from similar 
              packages), it is magrittr-friendly (by re-ordering functions 
@@ -11,5 +11,11 @@ Description: Call GDAL's utilies using simple system calls and file paths. It
 Depends: R (>= 3.1.0)
 License: GPL-3 | file LICENSE
 LazyData: true
-RoxygenNote: 7.0.0
-
+Imports:
+    dplyr,
+    magrittr,
+    stringr,
+    tibble
+RoxygenNote: 7.0.2
+Suggests: 
+    testthat
