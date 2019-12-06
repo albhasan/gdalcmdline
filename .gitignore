@@ -38,3 +38,8 @@ rsconnect/
 # TAGS
 tags
 
+# VIM
+*~
+*.swp
+*.swo
+
