@@ -13,40 +13,62 @@
 #' }
 parse_os_help <- function(os_response){
     value <- arg_raw <- keyvalue <- kv_split <- key <- minimum <- maximum <- NULL
+
+    pat_empty <- "^(?![i\\s\\S])"
+    pat_letters <- "[a-zA-Z]+"
+    pat_no_squares <- "(\\[|\\]|\\*)"
+    pat_option <- '\\[-+[a-zA-Z0-9-_\\"=|/[.] ]+\\]\\*?'
+    pat_star   <- "\\*"
+    pat_whitespaces <- "\\s+"
+
     help_message <- os_response %>%
         stringr::str_c(collapse = ' ')
-    option_pat <- "\\[-+[a-zA-Z]+(\\]| [a-zA-Z]+\\]\\*| [a-zA-Z]+\\])"
+
+    id_to <- os_response %>%
+        stringr::str_detect(pattern = pat_empty) %>%
+        which()
+
+    if (length(id_to) > 1) {
+        id_to <- id_to %>%
+            magrittr::extract(-1) %>%
+            dplyr::first()
+        help_message <- os_response %>%
+            magrittr::extract(1:id_to) %>%
+            stringr::str_c(collapse = ' ')
+    }
+
     optionals <- help_message %>%
-        stringr::str_extract_all(pattern = option_pat) %>%
+        stringr::str_extract_all(pattern = pat_option) %>%
         unlist() %>%
         tibble::enframe(name = NULL) %>%
         dplyr::rename(arg_raw = value) %>%
         dplyr::mutate(minimum = 0,
-                      maximum = ifelse(stringr::str_detect(arg_raw, pattern = '\\*'),
-                                       Inf, 1),
-                      keyvalue = stringr::str_extract(arg_raw, pattern = "[^\\[\\]-]+"),
-                      kv_split = stringr::str_split(keyvalue,  pattern = " "),
+                      maximum = ifelse(stringr::str_detect(arg_raw, pattern = pat_star), Inf, 1),
+                      keyvalue = stringr::str_remove_all(arg_raw, pattern = pat_no_squares),
+                      kv_split = stringr::str_split(keyvalue, pattern = " "),
                       key   = vapply(kv_split, dplyr::first, character(1)),
                       value = vapply(kv_split, dplyr::nth, n = 2,  character(1))) %>%
         dplyr::select(key, value, minimum, maximum)
 
     last_flag <- help_message %>%
-        stringr::str_locate_all(pattern = option_pat) %>%
+        stringr::str_locate_all(pattern = pat_option) %>%
         unlist() %>%
         dplyr::last()
 
     arguments <- help_message %>%
         stringr::str_sub(start = (last_flag + 1)) %>%
         trimws() %>%
-        stringr::str_replace(pattern = "\\s+", replacement = ' ') %>%
+        stringr::str_replace(pattern = pat_whitespaces, replacement = ' ') %>%
         stringr::str_split(pattern = ' ') %>%
         unlist() %>%
         tibble::enframe(name = NULL) %>%
         dplyr::rename(arg_raw = value) %>%
-        dplyr::mutate(key = stringr::str_extract(arg_raw, pattern = "[a-zA-Z]+"),
+        dplyr::mutate(key = stringr::str_extract(arg_raw,
+                                                 pattern = pat_letters),
                       value = NA,
                       minimum = 1,
-                      maximum = ifelse(stringr::str_detect(arg_raw, pattern = '\\*'),
+                      maximum = ifelse(stringr::str_detect(arg_raw,
+                                                           pattern = pat_star),
                                        Inf, 1)) %>%
         dplyr::select(key, value, minimum, maximum)
 
