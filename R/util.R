@@ -1,3 +1,63 @@
+#' @title Parse the arguments of a operating system call.
+#' @author Alber Sanchez, \email{alber.ipia@@inpe.br}
+#' @description Parse the arguments of a operating system call.
+#'
+#' @param os_response A character. The operating system response to a call.
+#' @return            A character
+#' @export
+#' @examples
+#' \dontrun{
+#' library(magrittr)
+#' system2("gdalinfo", stdout = TRUE, stderr = TRUE) %>%
+#'     parse_os_help()
+#' }
+parse_os_help <- function(os_response){
+    value <- arg_raw <- keyvalue <- kv_split <- key <- minimum <- maximum <- NULL
+    help_message <- os_response %>%
+        stringr::str_c(collapse = ' ')
+    option_pat <- "\\[-+[a-zA-Z]+(\\]| [a-zA-Z]+\\]\\*| [a-zA-Z]+\\])"
+    optionals <- help_message %>%
+        stringr::str_extract_all(pattern = option_pat) %>%
+        unlist() %>%
+        tibble::enframe(name = NULL) %>%
+        dplyr::rename(arg_raw = value) %>%
+        dplyr::mutate(minimum = 0,
+                      maximum = ifelse(stringr::str_detect(arg_raw, pattern = '\\*'),
+                                       Inf, 1),
+                      keyvalue = stringr::str_extract(arg_raw, pattern = "[^\\[\\]-]+"),
+                      kv_split = stringr::str_split(keyvalue,  pattern = " "),
+                      key   = vapply(kv_split, dplyr::first, character(1)),
+                      value = vapply(kv_split, dplyr::nth, n = 2,  character(1))) %>%
+        dplyr::select(key, value, minimum, maximum)
+
+    last_flag <- help_message %>%
+        stringr::str_locate_all(pattern = option_pat) %>%
+        unlist() %>%
+        dplyr::last()
+
+    arguments <- help_message %>%
+        stringr::str_sub(start = (last_flag + 1)) %>%
+        trimws() %>%
+        stringr::str_replace(pattern = "\\s+", replacement = ' ') %>%
+        stringr::str_split(pattern = ' ') %>%
+        unlist() %>%
+        tibble::enframe(name = NULL) %>%
+        dplyr::rename(arg_raw = value) %>%
+        dplyr::mutate(key = stringr::str_extract(arg_raw, pattern = "[a-zA-Z]+"),
+                      value = NA,
+                      minimum = 1,
+                      maximum = ifelse(stringr::str_detect(arg_raw, pattern = '\\*'),
+                                       Inf, 1)) %>%
+        dplyr::select(key, value, minimum, maximum)
+
+    optionals %>%
+        dplyr::bind_rows(arguments) %>%
+        dplyr::mutate(value = as.character(value),
+                      minimum = as.integer(minimum)) %>%
+        return()
+}
+
+
 #' @title Call the operating system.
 #' @author Alber Sanchez, \email{alber.ipia@@inpe.br}
 #' @description Call the operating system.
