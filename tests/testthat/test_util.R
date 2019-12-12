@@ -29,7 +29,6 @@ test_that("Parse gdalinfo 1.10.1", {
 })
 
 test_that("Parse gdalwarp 1.10.1", {
-
     gdalwarp_res <- c(
         "",
         "FAILURE: No target filename specified.",
@@ -88,4 +87,32 @@ test_that("Parse gdalwarp 1.10.1", {
                   minimum = as.integer(minimum))
     testthat::expect_equal(parse_os_help(gdalwarp_res), expected)
 })
+
+test_that("Parse gdalbuildvrt 1.10.1", {
+    gdalbuildvrt_res <- c( "",
+                           "FAILURE: No datasource specified.",
+                           "Usage: gdalinfo [--help-general] [-mm] [-stats] [-hist] [-nogcp] [-nomd]",
+                           "                [-norat] [-noct] [-nofl] [-checksum] [-proj4] [-mdd domain]*",
+                           "                [-sd subdataset] datasetname")
+    expected <- tibble::tribble(
+        ~key,             ~value,       ~minimum, ~maximum,
+        "--help-general", NA,           0,        1,
+        "-mm",            NA,           0,        1,
+        "-stats",         NA,           0,        1,
+        "-hist",          NA,           0,        1,
+        "-nogcp",         NA,           0,        1,
+        "-nomd",          NA,           0,        1,
+        "-norat",         NA,           0,        1,
+        "-noct",          NA,           0,        1,
+        "-nofl",          NA,           0,        1,
+        "-checksum",      NA,           0,        1,
+        "-proj4",         NA,           0,        1,
+        "-mdd",           "domain",     0,      Inf,
+        "-sd",            "subdataset", 0,        1,
+        "datasetname",    NA,           1,        1
+    ) %>%
+    dplyr::mutate(value = as.character(value),
+                  minimum = as.integer(minimum))
+    testthat::expect_equal(parse_os_help(gdalbuildvrt_res), expected)
+}
 
