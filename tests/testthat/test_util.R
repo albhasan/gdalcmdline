@@ -114,5 +114,5 @@ test_that("Parse gdalbuildvrt 1.10.1", {
     dplyr::mutate(value = as.character(value),
                   minimum = as.integer(minimum))
     testthat::expect_equal(parse_os_help(gdalbuildvrt_res), expected)
-}
+})
 
