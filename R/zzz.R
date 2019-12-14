@@ -3,3 +3,6 @@
     if (res != 0)
         warning("GDAL Utilities not found!")
 }
+
+utils::globalVariables(c(".", "%>%"))
+
