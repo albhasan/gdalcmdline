@@ -28,6 +28,43 @@ test_that("Parse gdalinfo 1.10.1", {
     testthat::expect_equal(parse_os_help(gdalinfo_res), expected)
 })
 
+
+test_that("Parse gdalinfo 3.0.2", {
+    gdalinfo_res <- c("", "FAILURE: No datasource specified.",
+                      "Usage: gdalinfo [--help-general] [-json] [-mm] [-stats] [-hist] [-nogcp] [-nomd]",
+                      "                [-norat] [-noct] [-nofl] [-checksum] [-proj4]",
+                      "                [-listmdd] [-mdd domain|`all`] [-wkt_format WKT1|WKT2|...]*",
+                      "                [-sd subdataset] [-oo NAME=VALUE]* datasetname")
+
+    expected <- tibble::tribble(
+        ~key,                        ~value,    ~minimum, ~maximum,
+
+        "--help-general",                NA,           0,        1,
+        "-json",                         NA,           0,        1,
+        "-mm",                           NA,           0,        1,
+        "-stats",                        NA,           0,        1,
+        "-hist",                         NA,           0,        1,
+        "-nogcp",                        NA,           0,        1,
+        "-nomd",                         NA,           0,        1,
+        "-norat",                        NA,           0,        1,
+        "-noct",                         NA,           0,        1,
+        "-nofl",                         NA,           0,        1,
+        "-checksum",                     NA,           0,        1,
+        "-proj4",                        NA,           0,        1,
+        "-listmdd",                      NA,           0,        1,
+        "-mdd",              "domain|`all`",           0,        1,
+        "-wkt_format",      "WKT1|WKT2|...",           0,      Inf,
+        "-sd",                 "subdataset",           0,        1,
+        "-oo",                 "NAME=VALUE",           0,      Inf,
+        "datasetname",                   NA,           1,        1
+    ) %>%
+    dplyr::mutate(value = as.character(value),
+                  minimum = as.integer(minimum))
+    testthat::expect_equal(parse_os_help(gdalinfo_res), expected)
+})
+
+
+
 test_that("Parse gdalwarp 1.10.1", {
     gdalwarp_res <- c(
         "",

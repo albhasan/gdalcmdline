@@ -17,7 +17,7 @@ parse_os_help <- function(os_response){
     pat_empty <- "^(?![i\\s\\S])"
     pat_letters <- "[a-zA-Z]+"
     pat_no_squares <- "(\\[|\\]|\\*)"
-    pat_option <- '\\[-+[a-zA-Z0-9-_\\"=|/[.] ]+\\]\\*?'
+    pat_option <- '\\[-+[a-zA-Z0-9-_`\\"=|/[.] ]+\\]\\*?'
     pat_star   <- "\\*"
     pat_whitespaces <- "\\s+"
 
