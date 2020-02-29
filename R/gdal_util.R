@@ -136,21 +136,11 @@ gdal_calc <- function(input_files,
     params <- append(params, paste(paste0("-", LETTERS[1:length(input_files)]),
                                    input_files))
     if (!is.null(band_number)) {
-        # NOTE: Either the number of bands match the number of input file or
-        #       all the bands are assigned to the first input file.
-        # TODO: Write a way of matching arbitray number of bands to arbitary
-        #       number of input files.
-        if (length(input_files) == length(band_number)) {
-            params <- append(params, paste0(paste0("--",
-                                                   LETTERS[1:length(band_number)],
-                                                   "_band="),
-                                            band_number))
-        } else if (length(input_files) == 1 &&
-                   length(band_number) >  1){
-            params <- append(params, paste0("--A_band=", band_number))
-        } else {
-            stop("Not implemented!")
-        }
+        if (length(input_files) != length(band_number))
+            stop("The number of input files and band numbers must match!")
+        params <- append(params, paste0(paste0("--",
+                                               LETTERS[1:length(band_number)],
+                                               "_band="), band_number))
     }
     if (!is.null(dstnodata))
         params <- append(params, paste0("--NoDataValue=", dstnodata))
